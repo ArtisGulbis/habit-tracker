@@ -1,24 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootStore } from './redux/store';
+import { createHabit, deleteHabit } from './redux/habit/habitActions';
+import { Formik, Form, Field } from 'formik';
+import { Habit } from './redux/habit/habitActionTypes';
+import uniqid from 'uniqid';
 
 function App() {
+  const habitState = useSelector((state: RootStore) => state.habitReducer);
+  const dispatch = useDispatch();
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Formik
+        initialValues={{ name: '', duration: 0 }}
+        onSubmit={(values) => {
+          dispatch(createHabit(values.name, values.duration, uniqid()));
+        }}
+      >
+        <Form>
+          <Field type="text" name="name" />
+          <Field type="text" name="duration" />
+          <button type="submit">create</button>
+        </Form>
+      </Formik>
+      {habitState.habits.map((habit: Habit) => (
+        <div key={habit.id}>
+          {habit.name} : {habit.duration}
+          <button onClick={() => dispatch(deleteHabit(habit.id))}>
+            delete
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
